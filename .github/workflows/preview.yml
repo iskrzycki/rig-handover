@@ -1,0 +1,43 @@
+# Plan morning-digest § 3 and § 4. The preview is built here and deployed to GitHub Pages as an
+# artifact, never committed (ADR 0003). LANE_MARKER comes from the repo secret of that name:
+# delete the secret and run this again to upload the same page, without the marker, over the
+# same link.
+name: preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.14.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm preview /digest/2026-10-28 site/index.html
+        env:
+          LANE_MARKER: ${{ secrets.LANE_MARKER }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+          retention-days: 1
+      - id: deploy
+        uses: actions/deploy-pages@v5

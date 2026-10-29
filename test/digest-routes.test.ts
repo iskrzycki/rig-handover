@@ -66,7 +66,7 @@ describe('GET /digest/:night', () => {
     const html = await res.text();
     expect(res.status).toBe(200);
     expect(html).toContain('backup-nightly');
-    expect(html).toContain("1 line didn't parse");
+    expect(html).toContain('1 line didn&#39;t parse');
   });
 });
 
